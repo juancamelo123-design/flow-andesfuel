@@ -17,7 +17,7 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--sage2);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.5;letter-spacing:.003em;-webkit-font-smoothing:antialiased}
-@media (min-width:1100px) and (min-height:620px){html,body{overflow:hidden}}
+@media (min-width:1100px) and (min-height:620px){html,body{overflow:hidden}body{display:flex;flex-direction:column;height:100vh}.split{flex:1;min-height:0}}
 button{font-family:inherit;color:inherit}
 :focus-visible{outline:3px solid #3E5208;outline-offset:2px}
 p,h1,h2,h3{margin:0}
@@ -34,7 +34,7 @@ p,h1,h2,h3{margin:0}
 .mode i{width:7px;height:7px;border-radius:50%;background:#7DB32A}
 @media (max-width:1100px){.top{height:auto;grid-template-columns:1fr auto;padding-block:12px}.top .desc{grid-column:1/-1;white-space:normal}}
 
-.split{display:grid;grid-template-columns:minmax(400px,0.78fr) minmax(0,1.22fr);height:calc(100vh - 52px)}
+.split{display:grid;grid-template-columns:minmax(400px,0.78fr) minmax(0,1.22fr);}
 @media (max-width:1100px){.split{grid-template-columns:1fr;height:auto}}
 .side{padding:30px max(16px,1.6vw) 18px;display:flex;flex-direction:column;gap:14px;min-height:0}
 .left{background:#1C2611;color:#F2F4EC;align-items:center}
@@ -44,11 +44,13 @@ p,h1,h2,h3{margin:0}
 .right .eyebrow{color:var(--muted)}
 .stitle{font-family:var(--title);font-size:22px;font-weight:500;line-height:1.2;letter-spacing:0;text-wrap:balance}
 .left .head{width:min(440px,100%);display:flex;flex-direction:column;gap:8px}
-.left .hint{font-size:13px;line-height:1.55;color:#C9D0BF}
-.cases{display:flex;flex-wrap:wrap;gap:6px;width:min(440px,100%)}
-.cases button{all:unset;cursor:pointer;font-size:12.5px;font-weight:500;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.08);color:#E3EAD8}
-.cases button[aria-pressed="true"]{background:var(--lime);color:var(--dark)}
-.cases button:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
+.scen{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:10px max(16px,2vw);background:var(--soft);border-bottom:1px solid var(--line)}
+.scen-l{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.cases{display:flex;flex-wrap:wrap;gap:6px}
+.cases button{all:unset;cursor:pointer;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink)}
+.cases button:hover{border-color:#B9BFB3}
+.cases button[aria-pressed="true"]{background:var(--dark);border-color:var(--dark);color:var(--lime)}
+.scen-h{font-size:12.5px;line-height:1.5;color:var(--muted);flex:1;min-width:280px}
 
 /* Phone (reference style) */
 .phonewrap{flex:1;min-height:0;display:flex;justify-content:center;width:100%}
@@ -197,15 +199,18 @@ details summary{cursor:pointer;font-weight:600}
   <p class="desc">Agente real sobre la API de Claude. El cliente reclama en la app; el agente reúne la evidencia y recomienda; el analista decide.</p>
   <span class="mode"><i aria-hidden="true"></i><span id="mode">Conectando…</span></span>
 </header>
+<nav class="scen" aria-label="Casos de uso">
+  <span class="scen-l">Caso de uso</span>
+  <div class="cases" id="cases" role="group" aria-label="Casos de uso"></div>
+  <p class="scen-h">Escoge un caso de uso, edita el reclamo si quieres y envíalo. Después puedes responderle al agente o adjuntar una foto como evidencia.</p>
+</nav>
 
 <main class="split">
   <section class="side left" aria-labelledby="ltitle">
     <div class="head">
       <p class="eyebrow">Vista del cliente</p>
       <h2 class="stitle" id="ltitle">Posibles casos de uso por cliente dentro de la app Flow</h2>
-      <p class="hint">Escoge un caso de uso, edita el reclamo si quieres y envíalo. Después puedes responderle al agente o adjuntar una foto como evidencia.</p>
     </div>
-    <div class="cases" id="cases" role="group" aria-label="Casos de uso"></div>
     <div class="phonewrap">
       <div class="phone">
         <div class="screen">
