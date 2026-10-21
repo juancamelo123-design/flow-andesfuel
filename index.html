@@ -8,7 +8,7 @@
 <style>
 /* Layout: top bar (role + filters + week) · KPI row · role-specific grid of panels */
 :root{
-  --bg:#ECEDEA; --panel:#FFFFFF; --ink:#161B10; --muted:#667060; --line:#E2E5DE; --soft:#F3F4F0;
+  --bg:#E7E9E3; --panel:#FFFFFF; --ink:#161B10; --muted:#667060; --line:#E2E5DE; --soft:#F3F4F0;
   --green:#4F7A28; --green2:#7FB532; --lime:#C8F31D; --dark:#1C2611;
   --ok:#3E6420; --okbg:#EAF3DE; --warn:#8A5300; --warnbg:#FDF0DA; --bad:#B8371B; --badbg:#FDE7E2; --badfill:#E5482A; --amber:#F2A93B;
   --display:'Archivo','Helvetica Neue',Arial,sans-serif; --mono:'JetBrains Mono','Courier New',monospace;
@@ -17,7 +17,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:14px;line-height:1.4;margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 36px}
-.shell{max-width:1400px;margin:0 auto;background:var(--panel);border-radius:22px;padding:18px 20px 22px;display:flex;flex-direction:column;gap:14px}
+.shell{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
 .top .as{flex:none;min-width:0}
 .row2{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding-top:4px}
@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:
 .logo i{width:26px;height:26px;border-radius:50%;border:5px solid var(--green);display:inline-block;position:relative}
 .logo i:after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--green)}
 .brand{height:34px;width:auto;display:block}
-.as{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:#F4F5F2;border-radius:999px;padding:5px 5px 5px 18px}
+.as{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--panel);border-radius:999px;padding:5px 5px 5px 18px}
 .as>span{color:var(--muted);font-weight:400;font-size:14px}
 .as .roles{background:transparent}
 .as .roles button{color:#3c4440}
@@ -35,8 +35,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--display);font-size:
 .roles button{all:unset;cursor:pointer;padding:6px 12px;border-radius:999px;font-size:13px;color:#3c4440}
 .roles button[aria-pressed="true"]{background:var(--green);color:#fff}
 .roles button:focus-visible,select:focus-visible,input:focus-visible,.btn:focus-visible{outline:3px solid var(--lime);outline-offset:2px}
-.filters{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-select,.btn{font:500 13px var(--display);border:1px solid #D9DCD6;border-radius:999px;padding:6px 12px;background:#fff;color:var(--ink)}
+.filters{margin-left:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+select,.btn,input[type=date]{font:500 13px var(--display);border:0;border-radius:999px;padding:8px 14px;background:#fff;color:var(--ink)}
+select:disabled{color:var(--muted);background:#F1F2EE;cursor:not-allowed;opacity:1}
+.fl{display:flex;flex-direction:column;gap:3px}
+.fl>span{font-size:11px;color:var(--muted);padding-left:12px}
+.lock{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--warn);background:var(--warnbg);border-radius:999px;padding:6px 12px;align-self:flex-end}
+.lock[hidden]{display:none}
 .btn{cursor:pointer;font-weight:600}
 .btn.prim{background:var(--dark);color:var(--lime);border-color:var(--dark)}
 .wk{display:flex;align-items:center;gap:6px;font-size:13px}
@@ -44,8 +49,8 @@ select,.btn{font:500 13px var(--display);border:1px solid #D9DCD6;border-radius:
 .hi{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
 .hi h1{font-size:22px;margin:0}
 .hi span{color:var(--muted);font-size:13px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.k{border:1px solid var(--line);border-radius:16px;padding:12px 14px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+.k{background:var(--panel);border-radius:22px;padding:16px 18px;min-width:0}
 .k.ns{background:var(--green);color:#fff;border-color:var(--green)}
 .k .l{font-size:12px;color:var(--muted)}
 .k.ns .l,.k.ns .s{color:#DCEBCB}
@@ -53,8 +58,8 @@ select,.btn{font:500 13px var(--display);border:1px solid #D9DCD6;border-radius:
 .k .s{font-size:12px;color:var(--muted)}
 .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:9px;margin-left:5px;vertical-align:middle}
 .t-ok{background:var(--okbg);color:var(--ok)} .t-warn{background:var(--warnbg);color:var(--warn)} .t-bad{background:var(--badbg);color:var(--bad)}
-.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
-.p{border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+.p{background:var(--panel);border-radius:24px;padding:20px 22px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
 @media (max-width:900px){.c4,.c5,.c6,.c7,.c8{grid-column:span 12}.filters{margin-left:0}}
 .p h2{font-size:14px;margin:0}
@@ -71,7 +76,6 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .alerts{display:flex;flex-direction:column;gap:6px}
 .a{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px}
 .dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
-.mail{font-family:var(--mono);font-size:12.5px;white-space:pre-wrap;background:var(--dark);color:#E3EAD8;border-radius:14px;padding:14px;margin:0}
 .note{font-size:12px;color:var(--muted)}
 .islas{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
 .isla{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px}
@@ -89,15 +93,15 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   <div class="row2">
   <div class="hi"><h1 id="hello">Vista general</h1><span id="ctx"></span></div>
     <div class="filters">
-      <label class="sr" for="fEst" hidden>Estación</label>
-      <select id="fEst" aria-label="País, zona o estación"></select>
-      <div class="wk"><label for="fWk">Semana</label><input id="fWk" type="range" min="1" max="8" value="8"><b id="wkv">8</b></div>
-      <button class="btn prim" id="mailBtn" type="button">Resumen por correo del agente</button>
+      <label class="fl"><span>País</span><select id="fPais"></select></label>
+      <label class="fl"><span>Zona o estación</span><select id="fEst"></select></label>
+      <label class="fl"><span>Semana del</span><input id="fDate" type="date" min="2026-08-24" max="2026-10-18" value="2026-10-18"></label>
+      <span class="lock" id="lock" hidden><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span id="lockTxt"></span></span>
     </div>
   </div>
   <div class="kpis" id="kpis"></div>
   <div class="grid" id="grid"></div>
-  <p class="note">Prototipo con datos del piloto (Tablas A–E del caso, cifras ficticias). Las series semanales por estación son ilustrativas: se reparten los totales del piloto. Cambia de rol, estación y semana para ver qué ve cada persona.</p>
+  <p class="note">Prototipo con datos del piloto (Tablas A–E del caso, cifras ficticias). Las series semanales por estación son ilustrativas: se reparten los totales del piloto. Cambia de rol, país, estación y semana para ver qué ve cada persona. Los resúmenes por rol los envía un agente de reportes desde el backend, donde vive la información; no vive en este tablero.</p>
 </div>
 
 <script>
@@ -218,26 +222,10 @@ function islasPanel(){
   return box;
 }
 
-// ---------------- Agent email summary (M4: reportes por rol) ----------------
-function mailFor(){
-  const r=ROLES.find(x=>x.id===role), d=dispWeek(wk), ns=nsWeek(wk), sc=$("fEst").selectedOptions[0].textContent;
-  const lines={
-    comite:[`North Star: ${fmt(ns)} tanqueos sin intervención en la semana ${wk}.`,`Control 1 (mes 1) en curso: plan anti-disputas 3 de 6 acciones activas.`,`Disputas: ${pct(d,2)} frente al umbral de 0,65 %. El freno automático pausa la inscripción.`,`Presupuesto año 1: USD 2,4 M de 4,2 M aprobados.`],
-    producto:[`Cuello de botella sin cambios: solo ${pct(ENR_W[wk-1])} de las placas leídas tiene Flow activo.`,`Disputas en ${pct(d,2)}; la aceptación del cliente ya está en el 100 % de los tanqueos.`,`Prioridad de la semana: campaña de inscripción con isleros y flotas.`],
-    zona:[`Tus estaciones: ${scopeStations().map(s=>s.name).join(", ")}.`,`Calle 26 tuvo 32 min sin enlace; operó en modo offline sin incidentes.`,`Isleros inscribieron 41 clientes nuevos.`],
-    estacion:[`Hoy: ${fmt(Math.round(ns/7))} tanqueos sin intervención en tus islas Flow.`,`Alerta: lluvia en la isla 3, lectura de placas en 81 %. Revisa la limpieza del lente.`,`Tus isleros inscribieron 12 clientes hoy.`],
-    riesgo:[`Disputas: ${pct(d,2)} (semana ${wk}). Freno activo desde 0,60 %.`,`1 caso de posible placa clonada escalado (GTR903).`,`El agente resolvió 3 reclamos mostrando la aceptación del cliente.`],
-    ing:[`Lectura de placas ponderada: ${pct(anpr()*100,0)}.`,`Calle 26: enlace inestable (32 min hoy). Cola offline enviada sin errores.`,`Av. 68 isla 2: lente sucio. Calle 80 isla 3: caída por lluvia.`]
-  }[role];
-  return `Para: ${r.who}\nAsunto: Flow · resumen semana ${wk} · ${sc}\n\n` + lines.map(l=>"• "+l).join("\n") + `\n\nEnviado por el agente de reportes. Solo informa: no toma decisiones ni mueve dinero.`;
-}
-
-// ---------------- Render ----------------
 function render(){
-  $("wkv").textContent = wk;
   const r = ROLES.find(x=>x.id===role);
   $("hello").textContent = `Buenos días · ${r.who}`;
-  $("ctx").textContent = `${$("fEst").selectedOptions[0].textContent} · semana ${wk} del piloto`;
+  $("ctx").textContent = `${$("fPais").selectedOptions[0].textContent} · ${$("fEst").selectedOptions[0].textContent} · semana ${wk} del piloto (${weekRange(wk)})`;
   [...$("roles").children].forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.r===role)));
   const d=dispWeek(wk), ns=nsWeek(wk), K=$("kpis"), G=$("grid"); K.textContent=""; G.textContent="";
   const kNS=kpi("North Star · tanqueos sin intervención (semana)", fmt(ns), `Promedio piloto 551 · meta mes 12 ≈ 11.000`, "ns");
@@ -263,21 +251,37 @@ function render(){
     add(disputesChart(), panel(5,"Disputas frente al umbral","", gauge(d)), panel(7,"Alertas de riesgo","Fraude, manipulación y freno automático",alertsPanel("riesgo")), panel(5,"Guardrails","Frenos automáticos", h("div",{class:"tw"}, (()=>{const t=h("table"); t.append(h("tr",{},h("th",{},"Freno"),h("th",{class:"n"},"Hoy"),h("th",{class:"n"},"Estado"))); [["Despacho sin autorización / doble cobro","0",["t-ok","ok"]],["Cobro a cuenta equivocada","0",["t-ok","ok"]],["Disputas ≥ 0,60 %",pct(d,2),d>=0.6?["t-bad","activo"]:["t-ok","ok"]]].forEach(([a,b,c])=>t.append(h("tr",{},h("td",{},a),h("td",{class:"n"},b),h("td",{class:"n"},h("span",{class:"pill "+c[0]},c[1]))))); return t;})()))); }
   if(role==="ing"){ [kR,kT].forEach(k=>K.append(k)); K.append(kpi("Estaciones con enlace inestable","1 de 3","Calle 26 · modo sin internet: el islero valida con la cédula","",["t-warn","vigilar"])); K.append(kpi("Edges actualizados","18 de 18","Despliegue canario sin rollback","",["t-ok","ok"]));
     add(panel(7,"Lectura de placas por condición","Piloto · meta 95 %", h("div",{class:"tw"}, (()=>{const t=h("table"); t.append(h("tr",{},h("th",{},"Condición"),h("th",{class:"n"},"Tráfico"),h("th",{class:"n"},"Lectura"),h("th",{class:"n"},"Estado"))); [["Día claro","55 %","97,1 %",["t-ok","ok"]],["Noche","25 %","88,4 %",["t-warn","bajo meta"]],["Lluvia","12 %","81,2 %",["t-bad","crítico"]],["Placa sucia","5 %","64,0 %",["t-bad","crítico"]],["Motos","3 %","52,0 %",["t-warn","fuera de Flow"]]].forEach(([a,b,c,e])=>t.append(h("tr",{},h("td",{},a),h("td",{class:"n"},b),h("td",{class:"n"},c),h("td",{class:"n"},h("span",{class:"pill "+e[0]},e[1]))))); return t;})())), panel(5,"Alertas técnicas","",alertsPanel("ing")), panel(12,"Estaciones","Salud por estación",stationTable())); }
-  if (window.__mailOpen) showMail();
 }
-function showMail(){
-  let box=document.getElementById("mailbox");
-  if(!box){ box=panel(12,"Resumen que recibe este rol por correo","Generado por el agente de reportes (M4) · solo informa", h("pre",{class:"mail",id:"mailtext"})); box.id="mailbox"; $("grid").prepend(box); }
-  document.getElementById("mailtext").textContent = mailFor();
-}
-
 // ---------------- Wire up ----------------
-ROLES.forEach(r=>{ const b=h("button",{type:"button","data-r":r.id},r.name); b.onclick=()=>{ role=r.id; if(r.scope==="station" && !sel.startsWith("s:")===false){} if(r.scope==="station" && (sel==="all"||sel.startsWith("z:")||sel==="co")){ sel="c80"; $("fEst").value="c80"; } if(r.scope==="zone" && (sel==="all"||sel==="co")){ sel="z:Norte"; $("fEst").value="z:Norte"; } render(); }; $("roles").append(b); });
-const opts=[["all","Todas · Colombia y Perú"],["co","País: Colombia"],["z:Norte","Zona Norte"],["z:Occidente","Zona Occidente"],["z:Centro","Zona Centro"],...STATIONS.map(s=>[s.id,"Estación "+s.name])];
-opts.forEach(([v,t])=>$("fEst").append(h("option",{value:v},t)));
+// Location filter: country first, then zone or station. Some roles can only see their own scope.
+const START = new Date("2026-08-24T00:00:00");          // pilot week 1 starts Monday 24 Aug 2026
+const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+function weekRange(w){ const a = new Date(START.getTime() + (w-1)*7*864e5), b = new Date(a.getTime() + 6*864e5); return `${a.getDate()} ${MES[a.getMonth()]}–${b.getDate()} ${MES[b.getMonth()]}`; }
+const ROLE_ACCESS = { zona:{ pais:"co", fixed:"z:Norte", txt:"Jefe de zona: solo ves la Zona Norte" }, estacion:{ pais:"co", fixed:"c80", txt:"Administrador: solo ves tu estación" } };
+function fillPais(){
+  const P = $("fPais"); P.textContent = "";
+  [["all","Todos los países"],["co","Colombia"],["pe","Perú · sin estaciones en el piloto"]].forEach(([v,t]) => { const o = h("option",{value:v},t); if (v === "pe") o.disabled = true; P.append(o); });
+}
+function fillEst(){
+  const E = $("fEst"); E.textContent = ""; const acc = ROLE_ACCESS[role];
+  let opts = [["all","Todas las estaciones"],["z:Norte","Zona Norte"],["z:Occidente","Zona Occidente"],["z:Centro","Zona Centro"],...STATIONS.map(s=>[s.id,"Estación "+s.name])];
+  if (acc && acc.fixed === "z:Norte") opts = [["z:Norte","Zona Norte"],...STATIONS.filter(s=>s.zona==="Norte").map(s=>[s.id,"Estación "+s.name])];
+  if (acc && acc.fixed === "c80") opts = [["c80","Estación Calle 80"]];
+  opts.forEach(([v,t]) => E.append(h("option",{value:v},t)));
+  if (![...E.options].some(o => o.value === sel)) sel = opts[0][0];
+  E.value = sel;
+}
+function applyAccess(){
+  const acc = ROLE_ACCESS[role];
+  if (acc) { $("fPais").value = acc.pais; sel = acc.fixed; }
+  $("fPais").disabled = !!acc; fillEst(); $("fEst").disabled = !!(acc && acc.fixed === "c80");
+  $("lock").hidden = !acc; $("lockTxt").textContent = acc ? acc.txt : "";
+}
+ROLES.forEach(r=>{ const b=h("button",{type:"button","data-r":r.id},r.name); b.onclick=()=>{ const was = ROLE_ACCESS[role]; role=r.id; if (was && !ROLE_ACCESS[role]) { sel="all"; $("fPais").value="all"; } applyAccess(); render(); }; $("roles").append(b); });
+fillPais(); applyAccess();
+$("fPais").onchange=e=>{ sel="all"; fillEst(); render(); };
 $("fEst").onchange=e=>{ sel=e.target.value; render(); };
-$("fWk").oninput=e=>{ wk=Number(e.target.value); render(); };
-$("mailBtn").onclick=()=>{ window.__mailOpen=!window.__mailOpen; $("mailBtn").textContent = window.__mailOpen?"Ocultar resumen por correo":"Resumen por correo del agente"; render(); };
+$("fDate").onchange=e=>{ const d=new Date(e.target.value+"T00:00:00"); if(isNaN(d)) return; wk=Math.min(8,Math.max(1,Math.floor((d-START)/(7*864e5))+1)); render(); };
 render();
 </script>
 
