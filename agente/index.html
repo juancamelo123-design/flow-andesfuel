@@ -44,8 +44,8 @@ p,h1,h2,h3{margin:0}
 .left .eyebrow{color:var(--lime)}
 .right .eyebrow{color:var(--muted)}
 .stitle{font-family:var(--title);font-size:22px;font-weight:500;line-height:1.2;letter-spacing:0;text-wrap:balance}
-.lcol{flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
-.left .head{width:0;min-width:100%;display:flex;flex-direction:column;gap:8px}
+.lcol{flex:1;min-height:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px}
+.left .head{width:min(440px,100%);display:flex;flex-direction:column;gap:8px}
 .cases{display:flex;flex-wrap:wrap;gap:6px}
 .cases button{all:unset;cursor:pointer;font-size:12.5px;font-weight:500;padding:6px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--ink)}
 .cases button:hover{border-color:#B9BFB3}
@@ -681,6 +681,9 @@ $("input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftK
 $("clipBtn").onclick = () => $("file").click();
 $("file").onchange = async e => { const f = e.target.files[0]; e.target.value = ""; if (!f) return; try { pending = await resize(f); renderAtt(); } catch (err) { ST[current].chat.push({ k:"sys", text:"No pudimos leer esa imagen." }); renderPhone(); } };
 renderAll(); setMode();
+// Keep the client title exactly as wide as the phone, so both share the same left edge.
+const alignHead = () => { const ph = document.querySelector(".phone"); if (ph) document.querySelector(".left .head").style.width = ph.getBoundingClientRect().width + "px"; };
+alignHead(); if (window.ResizeObserver) new ResizeObserver(alignHead).observe(document.querySelector(".phone")); addEventListener("resize", alignHead);
 (async () => {
   try { sample = window.claude ? await window.claude.use("sample") : null;
     if (sample) { const lim = await sample.limits().catch(() => null); toolsOk = !!(lim && lim.tools); } } catch (e) { sample = null; }
