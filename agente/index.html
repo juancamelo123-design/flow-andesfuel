@@ -153,10 +153,12 @@ p,h1,h2,h3{margin:0}
 .decide .lbl{color:#B9C0B0}
 .decide .act{color:#fff}
 .btns{display:flex;gap:8px}
-.btn{all:unset;cursor:pointer;font-weight:600;font-size:13px;border-radius:999px;padding:9px 16px;background:#fff;color:var(--ink)}
+.btn{all:unset;cursor:pointer;white-space:nowrap;font-weight:600;font-size:13px;border-radius:999px;padding:9px 16px;background:#fff;color:var(--ink)}
 .btn.prim{background:var(--lime)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 details{font-size:12.5px}
+.decide details{color:#D7DCCF}
+.decide details summary{color:#fff}
 details summary{cursor:pointer;font-weight:600}
 .trace{font-family:var(--mono);font-size:11px;line-height:1.5;background:var(--dark);color:#DDE5D2;border-radius:12px;padding:10px;margin-top:6px;max-height:180px;overflow:auto;overflow-wrap:anywhere}
 .trace .t{color:var(--lime)} .trace .d{color:#9FAA92}
@@ -179,9 +181,9 @@ details summary{cursor:pointer;font-weight:600}
     <div class="head">
       <p class="eyebrow">Vista del cliente</p>
       <h2 class="stitle" id="ltitle">Posibles casos de uso por cliente dentro de la app Flow</h2>
-      <p class="hint">Elige un cliente, edita el reclamo si quieres y envíalo. Después puedes responderle al agente o adjuntar una foto como evidencia.</p>
+      <p class="hint">Escoge un caso de uso, edita el reclamo si quieres y envíalo. Después puedes responderle al agente o adjuntar una foto como evidencia.</p>
     </div>
-    <div class="cases" id="cases" role="group" aria-label="Clientes de prueba"></div>
+    <div class="cases" id="cases" role="group" aria-label="Casos de uso"></div>
     <div class="phonewrap">
       <div class="phone">
         <div class="screen">
@@ -214,7 +216,7 @@ details summary{cursor:pointer;font-weight:600}
   <section class="side right" aria-labelledby="rtitle">
     <div class="rhead">
       <div><p class="eyebrow">Vista del analista</p><h2 class="stitle" id="rtitle">Consola de Riesgo y Fraude: tickets por resolver</h2></div>
-      <p class="note">El agente solo puede consultar, nunca mover dinero. Las reglas de seguridad están en el código y una persona aprueba cada pago.</p>
+      <p class="note">El agente solo puede consultar, nunca mover dinero. Las reglas de seguridad están en el código y cada devolución sigue una matriz de aprobación.</p>
     </div>
     <div class="monitor">
       <div class="bezel">
@@ -482,24 +484,53 @@ function traceBox(st, open){
   d.append(el("summary", null, `Traza del agente (${st.trace.length} líneas)`));
   const t = el("div", "trace"); st.trace.forEach(([k, s]) => t.append(el("div", k, s))); d.append(t); return d;
 }
+// Approval matrix (assumption to validate with Riesgo and Finanzas): who approves depends on the action, the amount and the risk.
+const MATRIZ = [
+  ["Liberar el remanente de un bloqueo", "Automático: el sistema de pagos"],
+  ["Reembolso ≤ COP 150.000, sin señales de riesgo", "Regla fija (no IA); el analista audita una muestra"],
+  ["Reembolso > COP 150.000 o caso dudoso", "Analista de Riesgo y Fraude"],
+  ["Fraude: congelar Flow y devolver, o > COP 500.000", "Doble aprobación: analista + supervisor"],
+  ["El cliente ya fue al banco (contracargo)", "Proceso del adquirente: Flow presenta la evidencia"]
+];
+function nivel(c, r){
+  const m = c.tx.monto;
+  if (r.accion_recomendada === "explicar_bloqueo") return { k:"auto", who:"Automático: el sistema de pagos" };
+  if (r.accion_recomendada === "escalar_fraude" || (m > 500000 && r.accion_recomendada === "proponer_reembolso")) return { k:"dual", who:"Analista + supervisor" };
+  if (r.accion_recomendada === "proponer_reembolso" && m <= 150000 && !r.alerta_manipulacion && !r.congelar_flow) return { k:"rule", who:"Regla fija (no IA); el analista audita" };
+  if (r.escalar || r.accion_recomendada === "proponer_reembolso" || r.accion_recomendada === "escalar_humano") return { k:"analyst", who:"Analista de Riesgo y Fraude" };
+  return { k:"none", who:"Nadie: no hay dinero en juego" };
+}
+function matrizBox(){
+  const d = el("details"); d.append(el("summary", null, "Matriz de aprobación (supuesto por validar)"));
+  const ul = el("ul", "checks"); ul.style.marginTop = "6px";
+  MATRIZ.forEach(([q, w]) => { const li = el("li"); li.append(el("span", null, "•"), el("span", null, `${q} → ${w}`)); ul.append(li); });
+  d.append(ul); return d;
+}
 function decisionBox(c, st, r){
-  const d = el("div", "decide");
+  const d = el("div", "decide"); const nv = nivel(c, r);
   if (st.status === "analista") {
     const what = r.accion_recomendada === "escalar_fraude" ? `Posible fraude por ${peso(c.tx.monto)}` : r.accion_recomendada === "proponer_reembolso" ? `Reembolso de ${peso(c.tx.monto)}` : "Revisar antes de responder";
-    d.append(el("p", "lbl", "Tu decisión"), el("p", "act", what));
-    const row = el("div", "btns"); const ok = el("button", "btn prim", "Aprobar"); ok.type = "button"; const no = el("button", "btn", "Rechazar"); no.type = "button";
+    const step = nv.k === "dual" ? (st.approvals ? " · paso 2 de 2" : " · paso 1 de 2") : "";
+    d.append(el("p", "lbl", `Decide: ${nv.who}${step}`), el("p", "act", what));
+    const row = el("div", "btns");
+    const ok = el("button", "btn prim", nv.k === "dual" && st.approvals ? "Aprobar como supervisor" : "Aprobar"); ok.type = "button";
+    const no = el("button", "btn", "Rechazar"); no.type = "button";
     ok.onclick = () => decide(true); no.onclick = () => decide(false); row.append(ok, no); d.append(row);
   } else if (st.status === "aprobado" || st.status === "rechazado") {
-    d.append(el("p", "lbl", "Tu decisión"), el("p", "act", st.status === "aprobado" ? "Aprobado: el sistema de pagos ejecuta" : "Rechazado: el caso vuelve a la cola"));
+    d.append(el("p", "lbl", `Decidió: ${nv.who}`), el("p", "act", st.status === "aprobado" ? "Aprobado: el sistema de pagos ejecuta" : "Rechazado: el caso vuelve a la cola"));
   } else if (st.status === "evidencia") {
     d.append(el("p", "lbl", "Sin acción por ahora"), el("p", "act", "El agente pidió evidencia al cliente"));
+  } else if (nv.k === "auto" || nv.k === "rule") {
+    d.append(el("p", "lbl", `Decide: ${nv.who}`), el("p", "act", nv.k === "auto" ? "El remanente se libera solo; el agente lo explica" : "Reembolso ejecutado por regla; queda para auditoría"));
   } else {
     d.append(el("p", "lbl", "Sin acción con dinero"), el("p", "act", "El agente le mostró la evidencia al cliente"));
   }
+  d.append(matrizBox());
   return d;
 }
 function decide(yes){
   const c = CASES[current], st = ST[current], r = st.result.r;
+  if (yes && nivel(c, r).k === "dual" && !st.approvals) { st.approvals = 1; st.trace.push(["d", "· Aprobación 1 de 2 (analista). Falta el supervisor."]); renderAll(); return; }
   st.status = yes ? "aprobado" : "rechazado";
   const msg = r.accion_recomendada === "escalar_fraude"
     ? (yes ? `Un analista confirmó señales de uso indebido de tu placa. Congelamos Flow en tu cuenta y te devolvemos ${peso(c.tx.monto)} en 2 días hábiles.` : "Un analista revisó tu caso y no encontró señales de fraude. Te enviamos el detalle de la evidencia.")
@@ -553,7 +584,8 @@ async function send(){
   const secs = ((performance.now() - stats.t0) / 1000).toFixed(1);
   st.trace.push(["d", stats.calls ? `· Respuesta en ${secs} s · ${stats.calls} llamadas · ${fmtN(stats.tok)} tokens · reglas aplicadas en código` : `· Respuesta en ${secs} s · reglas aplicadas en código`]);
   const { r, checks } = applyGuardrails(c, out || {}, st);
-  st.status = r.accion_recomendada === "pedir_evidencia" && !r.escalar ? "evidencia" : (r.escalar || r.accion_recomendada === "proponer_reembolso" || r.accion_recomendada === "escalar_fraude") ? "analista" : "resuelto";
+  const nv = nivel(c, r); st.approvals = 0;
+  st.status = r.accion_recomendada === "pedir_evidencia" && !r.escalar ? "evidencia" : (nv.k === "analyst" || nv.k === "dual") ? "analista" : "resuelto";
   st.result = { r, checks, via };
   const day = (c.tx.fecha.match(/^\d+/) || [""])[0];
   const chip = st.called.has("consultar_aceptacion") && c.aceptacion.aceptada && c.aceptacion.dispositivo !== "ninguno" ? [day, `Aceptado con un toque · ${c.aceptacion.hora}`, `${c.tx.estacion} · isla ${c.tx.isla}`] : null;
